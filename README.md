@@ -262,19 +262,27 @@ OTel Agent
 Run the following commands **on the affected Kubernetes nodes** (not in containers):
 
 ```bash
-# Find what's using port 7777
-netstat -tlnp | grep 7777
-# or
-ss -tlnp | grep 7777
+# Check what process is using port 7777
+# -t = TCP only | -l = listening | -n = numeric ports | -p = show process
+# Shows: process name + PID in format: users:(("process_name",pid=XXXX,fd=X))
+sudo ss -tlnp | grep 7777
 
-# Find what's using port 8888 (if that's also conflicting)
-netstat -tlnp | grep 8888
-# or
-ss -tlnp | grep 8888
+# Alternative using netstat (older systems)
+# -t = TCP only | -l = listening | -n = numeric ports | -p = show process
+# Shows: PID/process_name in last column
+sudo netstat -tlnp | grep 7777
 
-# List all listening ports
-ss -tlnp | head -50
+# Alternative using lsof
+# -i :7777 = show processes using port 7777
+# Shows: full details including COMMAND, PID, USER
+sudo lsof -i :7777
 ```
+
+**Example output (ss):**
+```
+LISTEN 0 511 0.0.0.0:7777 0.0.0.0:* users:(("nginx",pid=25637,fd=6))
+```
+This shows: process `nginx` with PID `25637` is using port 7777.
 
 ### Common Culprits
 
